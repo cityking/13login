@@ -6,7 +6,20 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EncodingUtils;
 
 import android.app.Activity;
@@ -41,19 +54,33 @@ public class MainActivity extends Activity {
 					//对中文username和password进行URLEncode编码避免提交到服务器产生乱码
 					path = "http://192.168.1.103:8080/mywe/login?username=" + URLEncoder.encode(username, "utf-8") + "&&password=" + URLEncoder.encode(password, "utf-8");
 				
-					URL url = new URL(path);
-					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-					conn.setConnectTimeout(5000);
-					conn.setRequestMethod("GET");
-					int code = conn.getResponseCode();
-					
+					//以httpclient方式进行get提交
+					DefaultHttpClient client = new DefaultHttpClient();
+					HttpGet get = new HttpGet(path);
+					HttpResponse response = client.execute(get);
+					int code = response.getStatusLine().getStatusCode();
 					if(code == 200){
-						
-						InputStream in = conn.getInputStream();
-						String content = StreamTools.readStream(in);
-					
+						InputStream inputStream = response.getEntity().getContent();
+						String content = StreamTools.readStream(inputStream);
 						showToast(content);
 					}
+					
+					
+					
+					
+//					URL url = new URL(path);
+//					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+//					conn.setConnectTimeout(5000);
+//					conn.setRequestMethod("GET");
+//					int code = conn.getResponseCode();
+//					
+//					if(code == 200){
+//						
+//						InputStream in = conn.getInputStream();
+//						String content = StreamTools.readStream(in);
+//					
+//						showToast(content);
+//					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -69,42 +96,62 @@ public class MainActivity extends Activity {
 				String username = ed_username.getText().toString().trim();
 				String password = ed_password.getText().toString().trim();
 				
-				//设置请求体
-				String head = "username="+username+"&password="+password;
+				String path = "http://192.168.1.103:8080/mywe/login";
 				
-				String path = "http://169.254.249.1:8080/mywe/login";
+//				//设置请求体
+//				String head = "username="+username+"&password="+password;
+				
+				
 				try {
-					URL url = new URL(path);
-					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-					conn.setConnectTimeout(5000);
-					//设置请求方式为post
-					conn.setRequestMethod("POST");
 					
-					//设置头信息
-					conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-					conn.setRequestProperty("Content-Length", head.length()+"");
+					DefaultHttpClient client = new DefaultHttpClient();
+					HttpPost post = new HttpPost(path);
 					
-					//发送请求信息
-					conn.setDoOutput(true);
-					OutputStream os = conn.getOutputStream();
-					os.write(head.getBytes());
-					os.close();
-					
-					int code = conn.getResponseCode();
-					
-					System.out.println("code="+code);
-					
+					List<BasicNameValuePair> lists = new ArrayList<BasicNameValuePair>();
+					BasicNameValuePair nameValuePair = new BasicNameValuePair("username", username);
+					BasicNameValuePair pwdValuePair = new BasicNameValuePair("password", password);
+					lists.add(nameValuePair);
+					lists.add(pwdValuePair);
+					UrlEncodedFormEntity entity = new UrlEncodedFormEntity(lists);
+					post.setEntity(entity );
+					HttpResponse response = client.execute(post);
+					int code = response.getStatusLine().getStatusCode();
 					if(code == 200){
-						
-						
-						
-						
-						
-						InputStream in = conn.getInputStream();
-						String content = StreamTools.readStream(in);
-					
+						InputStream inputStream = response.getEntity().getContent();
+						String content = StreamTools.readStream(inputStream);
 						showToast(content);
 					}
+					
+					
+					
+					
+//					URL url = new URL(path);
+//					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+//					conn.setConnectTimeout(5000);
+//					//设置请求方式为post
+//					conn.setRequestMethod("POST");
+//					
+//					//设置头信息
+//					conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+//					conn.setRequestProperty("Content-Length", head.length()+"");
+//					
+//					//发送请求信息
+//					conn.setDoOutput(true);
+//					OutputStream os = conn.getOutputStream();
+//					os.write(head.getBytes());
+//					os.close();
+//					
+//					int code = conn.getResponseCode();
+//					
+//					
+//					
+//					if(code == 200){
+//						InputStream in = conn.getInputStream();
+//						String content = StreamTools.readStream(in);
+//					
+//						showToast(content);
+//					}
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
