@@ -26,8 +26,13 @@ public class login extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String username = request.getParameter("username");
 		String password = request.getParameter("password");
+		
+		//解码客户端传过来的数据
+		System.out.println("username:"+new String(username.getBytes("iso-8859-1"),"utf-8"));
 		if("cityking".equals(username) && "123".equals(password)){
-			response.getOutputStream().write("success".getBytes());
+			response.getOutputStream().write("成功".getBytes());
+			//服务器处理返给客户端数据乱码
+//			response.getOutputStream().write("成功".getBytes("utf-8"));
 		}else{
 			response.getOutputStream().write("login fail".getBytes());
 		}

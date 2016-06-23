@@ -2,11 +2,16 @@ package com.example.login;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
+
+import org.apache.http.util.EncodingUtils;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Xml.Encoding;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -30,9 +35,12 @@ public class MainActivity extends Activity {
 			public void run() {
 				String username = ed_username.getText().toString().trim();
 				String password = ed_password.getText().toString().trim();
-				System.out.println("username:"+username+" password:"+password);
-				String path = "http://169.254.249.1:8080/mywe/login?username=" + username + "&&password=" + password;
+				String path;
 				try {
+					
+					//对中文username和password进行URLEncode编码避免提交到服务器产生乱码
+					path = "http://192.168.1.103:8080/mywe/login?username=" + URLEncoder.encode(username, "utf-8") + "&&password=" + URLEncoder.encode(password, "utf-8");
+				
 					URL url = new URL(path);
 					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 					conn.setConnectTimeout(5000);
